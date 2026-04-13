@@ -127,40 +127,6 @@ const server: Plugin = async (ctx, options) => {
         ready.map((h) => h.id),
       )
     },
-
-    tool: {
-      session_tree_handoff: tool({
-        description: "Create branch handoff note",
-        args: {
-          fromSessionID: tool.schema.string(),
-          toSessionID: tool.schema.string(),
-          text: tool.schema.string(),
-        },
-        async execute(args) {
-          const from = args.fromSessionID.trim()
-          const to = args.toSessionID.trim()
-          const text = args.text.trim()
-          if (!from || !to || !text) return "invalid args"
-          await appendHandoff(base, {
-            id: randomUUID(),
-            fromSessionID: from,
-            toSessionID: to,
-            text,
-            createdAt: Date.now(),
-            status: "pending",
-          })
-          await upsertNode(base, {
-            sessionID: from,
-            rootSessionID: from,
-          })
-          await upsertNode(base, {
-            sessionID: to,
-            rootSessionID: to,
-          })
-          return "ok"
-        },
-      }),
-    },
   }
 
   return hooks
