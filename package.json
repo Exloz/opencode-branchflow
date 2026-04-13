@@ -1,0 +1,41 @@
+{
+  "name": "@exloz/opencode-branchflow",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Branching workflow for OpenCode with tree navigation and AI handoff summaries",
+  "license": "MIT",
+  "exports": {
+    "./server": "./dist/server.js",
+    "./tui": "./dist/tui.js"
+  },
+  "engines": {
+    "opencode": ">=1.4.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@opencode-ai/plugin": "^1.4.3",
+    "solid-js": "^1.9.9",
+    "zod": "^3.24.2"
+  },
+  "peerDependencies": {
+    "@opentui/core": ">=0.1.97",
+    "@opentui/solid": ">=0.1.97"
+  },
+  "peerDependenciesMeta": {
+    "@opentui/core": {
+      "optional": true
+    },
+    "@opentui/solid": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@opentui/core": "^0.1.97",
+    "@opentui/solid": "^0.1.97",
+    "@types/node": "^22.13.10",
+    "typescript": "^5.8.2"
+  }
+}
