@@ -75,9 +75,26 @@ export async function collectTree(client: ClientLike, rootID: string) {
 }
 
 export async function collectMetaTree(client: ClientLike, state: TreeState, rootID: string, currentID: string) {
-  const ids = subtree(state, rootID)
+  // Collect all IDs: root + current + ancestors of current + descendants of root
+  const ids = new Set<string>()
   ids.add(rootID)
   ids.add(currentID)
+
+  // Add all ancestors from current up to root
+  let cur = currentID
+  const seen = new Set<string>()
+  while (cur && !seen.has(cur)) {
+    seen.add(cur)
+    const meta = state.nodes[cur]
+    if (!meta?.parentSessionID) break
+    ids.add(meta.parentSessionID)
+    cur = meta.parentSessionID
+  }
+
+  // Add all descendants of root
+  for (const id of subtree(state, rootID)) {
+    ids.add(id)
+  }
 
   const parent = new Map<string, string | undefined>()
   const sessions = new Map<string, SessionLite>()

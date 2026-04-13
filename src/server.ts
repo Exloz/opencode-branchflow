@@ -80,9 +80,6 @@ const server: Plugin = async (ctx, options) => {
   const hooks: Hooks = {
     event: async ({ event }) => {
       const sid = eventSessionID(event)
-      if ((event.type === "session.created" || event.type === "session.updated") && sid) {
-        await ensure(sid)
-      }
       if (event.type === "session.deleted" && sid) {
         const state = await loadState(base)
         delete state.nodes[sid]
