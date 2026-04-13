@@ -4,6 +4,10 @@
   "type": "module",
   "description": "Branching workflow for OpenCode with tree navigation and AI handoff summaries",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Exloz/opencode-branchflow"
+  },
   "files": [
     "dist",
     "README.md"
