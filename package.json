@@ -1,6 +1,6 @@
 {
   "name": "@exloz/opencode-branchflow",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Branching workflow for OpenCode with tree navigation and AI handoff summaries",
   "license": "MIT",
