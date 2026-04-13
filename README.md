@@ -35,21 +35,21 @@ Add it directly to OpenCode config:
 ```jsonc
 // .opencode/tui.json
 {
-  "plugin": ["@exloz/opencode-branchflow@0.1.0"]
+  "plugin": ["@exloz/opencode-branchflow@latest"]
 }
 ```
 
 ```jsonc
 // .opencode/opencode.json
 {
-  "plugin": ["@exloz/opencode-branchflow@0.1.0"]
+  "plugin": ["@exloz/opencode-branchflow@latest"]
 }
 ```
 
 Or install it through OpenCode:
 
 ```bash
-opencode plugin @exloz/opencode-branchflow@0.1.0
+opencode plugin @exloz/opencode-branchflow@latest
 ```
 
 ## Commands
@@ -77,7 +77,7 @@ You can configure which model generates branch summaries (`Switch + share summar
 {
   "plugin": [
     [
-      "@exloz/opencode-branchflow@0.1.0",
+      "@exloz/opencode-branchflow@latest",
       {
         "summaryModelProviderID": "anthropic",
         "summaryModelID": "claude-3-5-sonnet-latest",
