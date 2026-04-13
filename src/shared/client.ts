@@ -177,7 +177,8 @@ export function toMessageLite(input: unknown): MessageLite | undefined {
   const role = readString(info, "role")
   if (!id || !role) return undefined
   const text = extractText(input)
-  return { id, role, text }
+  const time = readTime(info)
+  return { id, role, text, time }
 }
 
 function extractText(input: unknown) {
@@ -223,6 +224,15 @@ function readString(input: unknown, key: string) {
   const value = input[key]
   if (typeof value !== "string") return
   return value
+}
+
+function readTime(input: unknown): { created: number } | undefined {
+  if (!isRec(input)) return
+  const time = input.time
+  if (!isRec(time)) return
+  const created = time.created
+  if (typeof created !== "number") return
+  return { created }
 }
 
 function isRec(input: unknown): input is Record<string, unknown> {

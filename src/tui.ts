@@ -123,6 +123,7 @@ async function nodeActions(api: Parameters<TuiPlugin>[0], base: string, from: st
         const value = String(opt.value)
         if (value === "switch") {
           api.ui.dialog.clear()
+          void run(api, async () => visitSession(base, to), "Could not mark visit")
           api.route.navigate("session", { sessionID: to })
           return
         }
@@ -153,17 +154,22 @@ async function shareAndSwitch(
   if (mode === "summary") {
     const state = await loadState(base)
     const sourceForkMessageID = state.nodes[from]?.forkMessageID
+    const lastVisitStartedAt = state.nodes[from]?.lastVisitStartedAt
     const raw = await getMessages(api.client as never, from)
     const list = raw.map(toMessageLite).filter((x): x is NonNullable<typeof x> => !!x)
-    const sourceSnapshot = buildSnapshot(list, sourceForkMessageID)
+    // Use return point (lastVisitStartedAt) if available, otherwise fallback to forkMessageID
+    const returnMessageID = lastVisitStartedAt ? findReturnMessageID(list, lastVisitStartedAt, sourceForkMessageID) : undefined
+    const cutoffMessageID = returnMessageID || sourceForkMessageID
+    const sourceSnapshot = buildSnapshot(list, cutoffMessageID)
     api.ui.dialog.clear()
+    await visitSession(base, to)
     api.route.navigate("session", { sessionID: to })
     await appendHandoff(base, {
       id: randomUUID(),
       fromSessionID: from,
       toSessionID: to,
       mode: "summary",
-      sourceForkMessageID,
+      sourceForkMessageID: cutoffMessageID,
       sourceSnapshot,
       summaryStatus: "pending",
       createdAt: Date.now(),
@@ -193,6 +199,7 @@ async function shareAndSwitch(
       onConfirm(input) {
         const note = (input || "").trim() || text.trim()
         api.ui.dialog.clear()
+        void run(api, async () => visitSession(base, to), "Could not mark visit")
         api.route.navigate("session", { sessionID: to })
         if (!note) return
         void run(api, async () => {
@@ -275,6 +282,7 @@ async function createBranch(
     forkMessageID,
     forkMessageRole: role === "user" ? "user" : "assistant",
     lastVisitedAt: Date.now(),
+    lastVisitStartedAt: Date.now(),
   }
   await saveState(base, state)
   api.ui.dialog.clear()
@@ -598,6 +606,46 @@ function buildSummary(list: Array<{ role: string; text: string }>) {
     "",
     "Continue current branch with this context where relevant.",
   ].join("\n")
+}
+
+async function visitSession(base: string, sessionID: string) {
+  const state = await loadState(base)
+  const now = Date.now()
+  const cur = state.nodes[sessionID]
+  // If first visit or lastVisitStartedAt is unset, mark as first visit
+  if (!cur?.lastVisitStartedAt) {
+    state.nodes[sessionID] = {
+      ...cur,
+      sessionID,
+      rootSessionID: cur?.rootSessionID ?? sessionID,
+      parentSessionID: cur?.parentSessionID,
+      forkMessageID: cur?.forkMessageID,
+      forkMessageRole: cur?.forkMessageRole,
+      label: cur?.label,
+      note: cur?.note,
+      lastVisitedAt: now,
+      lastVisitStartedAt: now,
+    }
+  } else {
+    // Update lastVisitedAt but keep lastVisitStartedAt (the original entry point)
+    state.nodes[sessionID] = {
+      ...cur,
+      lastVisitedAt: now,
+    }
+  }
+  await saveState(base, state)
+}
+
+function findReturnMessageID(
+  list: Array<{ id: string; role: string; text: string; time?: { created: number } }>,
+  lastVisitStartedAt: number,
+  forkMessageID?: string,
+): string | undefined {
+  // Find all messages BEFORE lastVisitStartedAt
+  const beforeVisit = list.filter((m) => m.time && m.time.created < lastVisitStartedAt)
+  if (!beforeVisit.length) return undefined
+  // Return the last message before the visit
+  return beforeVisit[beforeVisit.length - 1].id
 }
 
 async function run(api: Parameters<TuiPlugin>[0], fn: () => Promise<void>, message: string) {

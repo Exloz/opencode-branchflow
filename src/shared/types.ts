@@ -12,6 +12,7 @@ export type MessageLite = {
   id: string
   role: string
   text: string
+  time?: { created: number }
 }
 
 export type NodeMeta = {
@@ -23,6 +24,7 @@ export type NodeMeta = {
   label?: string
   note?: string
   lastVisitedAt?: number
+  lastVisitStartedAt?: number
 }
 
 export type HandoffMeta = {
